@@ -6,7 +6,7 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    archieve = {
+    archive = {
       source  = "hashicorp/archive"
       version = "~> 2.4"
     }
@@ -20,10 +20,10 @@ provider "aws" {
 # global context
 locals {
   project_name = var.project_name
-  bucket_name  = "${var.project_name}-rag-doc"
+  bucket_name  = "rag-docs-${var.project_name}"
   namespace    = "default"
-  embed_model  =
-  chat_model   =
+  embed_model  = "text-embedding-3-small"
+  chat_model   = "gpt-4o-mini"
 }
 
 # aws account/region data

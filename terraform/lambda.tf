@@ -23,26 +23,26 @@ data "archive_file" "query_zip" {
 
 # lambda function resource
 resource "aws_lambda_function" "get_upload_url" {
-    function        = "${local.project_name}-get-upload-url"
-    rolehandler     = aws_iam_role.lambda_exec.arn                      # iam role gives lmabda permissions
-    handler         = "main.handler"                                    # tells lmabda which function to call: handler() in main.py
-    runtime         = "python3.11"                                      # python ver lambda uses
-    filename        = data.archive_file.upload_url_zip.output_path      # zip file that will contain code
-    timeout         = 10                                                # max exec time 
-    memory_size     = 256                                               # RAM allocated to fn (MB)
-    architectures   = ["x86_64"]                                        # cpu architectures
+  function_name = "${local.project_name}-get-upload-url"
+  role          = aws_iam_role.lambda_exec.arn                 # iam role gives lmabda permissions
+  handler       = "main.handler"                               # tells lmabda which function to call: handler() in main.py
+  runtime       = "python3.11"                                 # python ver lambda uses
+  filename      = data.archive_file.upload_url_zip.output_path # zip file that will contain code
+  timeout       = 10                                           # max exec time 
+  memory_size   = 256                                          # RAM allocated to fn (MB)
+  architectures = ["x86_64"]                                   # cpu architectures
 
-    layers = [aws_lambda_layer_version.faiss_layer.arn]                 # layer linked to the lambda
+  layers = [aws_lambda_layer_version.faiss_layer.arn] # layer linked to the lambda
 
-    environment {
-        variables = {
-            BUCKET              = aws_s3_bucket.docs.bucket
-            NAMESPACE           = local.namespace
-            OPENAI_SECRET_ARN   = aws_secretsmanager_secret.openai_api.arn
-            EMBED_MODEL         = local.embed_model
-            CHAT_MODEL          = local.chat_model
-        }
+  environment {
+    variables = {
+      BUCKET            = aws_s3_bucket.docs.bucket
+      NAMESPACE         = local.namespace
+      OPENAI_SECRET_ARN = aws_secretsmanager_secret.openai_api.arn
+      EMBED_MODEL       = local.embed_model
+      CHAT_MODEL        = local.chat_model
     }
+  }
 }
 
 resource "aws_lambda_function" "ingest" {

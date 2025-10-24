@@ -3,27 +3,27 @@
 # creating the main API container
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "${local.project_name}-http-api"
-  protocol_type = "HTTP"                            # REST API 
+  protocol_type = "HTTP" # REST API 
 }
 
 # integrating with backend/lambda function
 # connects API gateway to lambda function
 # get presigned url for file upload
 resource "aws_apigatewayv2_integration" "upload_url" {
-  api_id                 = aws_apigatewayv2_api.http_api.id                 # which API this integration belongs to
-  integration_type       = "AWS_PROXY"                                      # aws_proxy = forward everything to lambda
-  integration_uri        = aws_lambda_function.get_upload_url.invoke_arn    # address for the lambda function
-  integration_method     = "POST"                                           # always POST for lambda
-  payload_format_version = "2.0"                                            # new simpler version format 
+  api_id                 = aws_apigatewayv2_api.http_api.id              # which API this integration belongs to
+  integration_type       = "AWS_PROXY"                                   # aws_proxy = forward everything to lambda
+  integration_uri        = aws_lambda_function.get_upload_url.invoke_arn # address for the lambda function
+  integration_method     = "POST"                                        # always POST for lambda
+  payload_format_version = "2.0"                                         # new simpler version format 
 }
 
 # process uploaded docs, build search index
 resource "aws_apigatewayv2_integration" "ingest" {
-  api_id                 = aws_apigatewayv2_api.http_api.id         
-  integration_type       = "AWS_PROXY"                              
-  integration_uri        = aws_lambda_function.ingest.invoke_arn    
-  integration_method     = "POST"                                   
-  payload_format_version = "2.0"                                    
+  api_id                 = aws_apigatewayv2_api.http_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.ingest.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
 }
 
 # answer questions using the index
@@ -39,8 +39,8 @@ resource "aws_apigatewayv2_integration" "query" {
 # maps HTTP requests to integrations
 resource "aws_apigatewayv2_route" "route_upload_url" {
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /upload-url"                                            # when someone POSTs to /upload-url
-  target    = "integrations/${aws_apigatewayv2_integration.upload_url.id}"  # points to integration or which lambda to call
+  route_key = "POST /upload-url"                                           # when someone POSTs to /upload-url
+  target    = "integrations/${aws_apigatewayv2_integration.upload_url.id}" # points to integration or which lambda to call
 }
 
 resource "aws_apigatewayv2_route" "route_ingest" {
@@ -60,8 +60,8 @@ resource "aws_apigatewayv2_route" "route_query" {
 # makes API actually live and accessible to users
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http_api.id
-  name        = "$default"                          # default stage name
-  auto_deploy = true                                # auto deploys changes when routes are updated
+  name        = "$default" # default stage name
+  auto_deploy = true       # auto deploys changes when routes are updated
 }
 
 # lambda permission/security
@@ -70,10 +70,10 @@ resource "aws_apigatewayv2_stage" "default" {
 # this allows api gateway to call them
 resource "aws_lambda_permission" "apigw_upload_url" {
   statement_id  = "AllowAPIGatewayInvokeUploadURL"
-  action        = "lambda:InvokeFunction"                               # permission to call the function
+  action        = "lambda:InvokeFunction" # permission to call the function
   function_name = aws_lambda_function.get_upload_url.function_name
-  principal     = "apigateway.amazonaws.com"                            # API gateway service
-  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"  
+  principal     = "apigateway.amazonaws.com" # API gateway service
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
 }
 
 resource "aws_lambda_permission" "apigw_ingest" {
